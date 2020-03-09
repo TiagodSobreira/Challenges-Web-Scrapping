@@ -1,0 +1,38 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Feb 29 01:24:32 2020
+
+@author: tiago
+"""
+
+#importando as bibliotecas
+import urllib.request
+from bs4 import BeautifulSoup
+import csv
+
+url = 'https://old.reddit.com/top/'
+page_requested = urllib.request.Request(url)
+page_html = urllib.request.urlopen(page_requested).read()
+
+soup = BeautifulSoup(page_html, 'html.parser')
+
+main_table = soup.find('div', attrs={'id':'siteTable'})
+
+links = main_table.find_all('a',class_='title')
+
+
+#de cada link devemos extrair o texto do link e o link em si
+with open("oldreddit.csv","w") as csvfile:
+    for link in links:
+        title = link.text
+        url = link['href']
+        if not url.startswith('https'):
+            url = 'https://reddit.com' + url
+        record = [
+                'title: ' + title,
+                'url: ' + url
+                ]
+        csv.writer(csvfile).writerow(record)
+
+    
+
