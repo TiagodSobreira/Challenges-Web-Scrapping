@@ -1,0 +1,39 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Mar  9 20:42:15 2020
+
+@author: tiago
+"""
+
+#importando bibliotecas que serão utilizadas ao longo do programa
+import requests
+from bs4 import BeautifulSoup as soup
+
+
+'''A Função get_estadao_text recebe dois argumentos: o primeiro
+é a url do site em formato de string; o segundo é o parser que 
+o usuário quer usar no HTML'''
+
+
+def get_estadao_text(x,y):
+    #fazendo download do html da página do estadão
+    estadao_url = x
+    r = requests.get(estadao_url)
+    estadao_requested = r.text
+
+    #parsing the html code
+    soup_estadao = soup(estadao_requested, y)
+
+    #achando todas as "p" tags
+    texto_estadao = soup_estadao.findAll('p')
+    #criando a lista paragrafos e adicionando o título da matéria
+    paragrafos = []
+    paragrafos.append(soup_estadao.title.text.strip())
+    #retirando o texto das "p" tags e adicionando a lista paragrafos
+    for texto in texto_estadao:
+        texto = texto.text
+        texto = texto.strip()
+        paragrafos.append(texto)
+    #retornando a lista    
+    return paragrafos
+      
