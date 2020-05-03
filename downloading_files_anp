@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Apr 25 15:38:16 2020
+@author: tiago
+"""
+
+from urllib.request import urlopen
+from bs4 import BeautifulSoup as soup
+import pandas as pd
+
+#Requisitar o html, organizar o arquivo e localizar o link desejado
+reponse = urlopen('http://www.anp.gov.br/dados-estatisticos').read()
+sauce = soup(reponse, 'html.parser')
+interna_faq = sauce.find('ul', {'class':'interna-faq'})
+tags_links = interna_faq.find_all('a')
+links = []
+for link in tags_links:
+    if link.attrs['href'] is not None:
+        links.append(link.attrs['href'])
+
+first_link = links[0]
+#a = 'http://www.anp.gov.br/arquivos/dados-estatisticos/producao-petroleo/producao_de_petroleo_m3.xls'
+response_data = urlopen('http://www.anp.gov.br' + first_link).read()
+response_data_str = str(response_data)
+lines = response_data_str.split('\\n')
+
+with open(r'petr_csv.csv', 'w') as fx:
+    for line in lines:
+        fx.write(line + '\n')
+    
