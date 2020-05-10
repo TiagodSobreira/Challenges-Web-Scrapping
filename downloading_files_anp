@@ -3,28 +3,49 @@
 Created on Sat Apr 25 15:38:16 2020
 @author: tiago
 """
-
-from urllib.request import urlopen
+#importanto bibliotecas necessárias
+import requests
 from bs4 import BeautifulSoup as soup
-import pandas as pd
 
-#Requisitar o html, organizar o arquivo e localizar o link desejado
-reponse = urlopen('http://www.anp.gov.br/dados-estatisticos').read()
-sauce = soup(reponse, 'html.parser')
-interna_faq = sauce.find('ul', {'class':'interna-faq'})
-tags_links = interna_faq.find_all('a')
-links = []
-for link in tags_links:
-    if link.attrs['href'] is not None:
-        links.append(link.attrs['href'])
+#endereço do site da agência nacional de petróleo
+url = 'http://www.anp.gov.br/dados-estatisticos'
+#fazendo o pedido da página pela biblioteca requests
+page = requests.get(url)
 
-first_link = links[0]
-#a = 'http://www.anp.gov.br/arquivos/dados-estatisticos/producao-petroleo/producao_de_petroleo_m3.xls'
-response_data = urlopen('http://www.anp.gov.br' + first_link).read()
-response_data_str = str(response_data)
-lines = response_data_str.split('\\n')
+#organizando o conteúdo da resposta usando o 'html.parser'
+sopa = soup(page.content, 'html.parser')
 
-with open(r'petr_csv.csv', 'w') as fx:
-    for line in lines:
-        fx.write(line + '\n')
-    
+#criando uma lista com partes específicas do html
+father = sopa.find_all('ul',{'class':'interna-faq'})
+
+#criando um loop para retirar a parte que me interessa do html
+#no caso a parte que me interessa são os links dentro da tag 'a'
+#irei armazenar esses links na lista criada na linha abaixo
+files_links = []
+for f in father:
+    for a in f.find_all('a',href=True):
+        files_links.append(a['href'])
+
+#função em que recebe parte de uma url e retorna um arquivo .xls
+#o arquivo .xls é salvo no diretório que está sendo usado
+def download_file(código):
+    link = 'http://www.anp.gov.br{}'.format(código)
+    response = requests.get(link)
+    file = response.content
+    with open(código.split('/')[-1], 'wb') as arquivo:
+        arquivo.write(file)
+
+#aplicando a função
+download_file(files_links[0])
+
+
+'''Comentários finais: está não é melhor forma de resolver o problema
+mais infelizmente foi a única que eu consegui. Temos que encontrar um
+modo de organizar os links com os nomes do arquivo, o problema é que
+os nomes estão repetidos'''
+'''files_names = []
+for f in father:
+    for a in f.find_all('a',href=True):
+        print(a.get_text())
+        
+'''
