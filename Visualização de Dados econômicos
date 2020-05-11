@@ -44,12 +44,12 @@ plt.close()
 vimos as variações que a taxa selic teve desde a redemocratização
 . Podemos perceber uma tendência geral de queda nos últmos anos'''
 
-exo_plot = plt.plot(exportação.index, exportação)
-pib_plot = plt.plot(pib.index, pib)
-plt.close
+
+plt.plot(pib.index, pib)
+plt.close()
 '''Estamos plotando no mesmo gráfico as variações de produto
 e exportações, podemos notar que o boom das commoditeis explica
 parte do crescimento do PIB entre 2003 e 2005'''
 
 cons_plot = plt.plot(consumo_familias.index, consumo_familias)
-exo_plot
+plt.plot(exportação.index, exportação)
