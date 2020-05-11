@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon May 11 16:46:07 2020
+
+@author: tiago
+"""
+
+
+#workshop de visualização de dados econômicos com matplotlib
+from matplotlib import pyplot as plt
+import pandas as pd
+from urllib.request import urlopen
+
+
+
+
+def get_data_bcb(código):
+    url = "http://api.bcb.gov.br/dados/serie/bcdata.sgs.{}/dados?formato=json".format(código)
+    html = urlopen(url).read()
+    df = pd.read_json(html)
+    df.index = pd.to_datetime(df['data'])
+    df = df['valor']
+    return df
+
+selic = get_data_bcb(11)
+exportação = get_data_bcb(23471)
+pib = get_data_bcb(7324)
+consumo_familias = get_data_bcb(22110)
+credito_fisica = get_data_bcb(20541)
+'''até essa parte vocês já sabem e virão no workshop sobre a extração de
+dados do Banco Central. Agora vamos aproveitar que conseguimos extrair
+os dados e vamos visualizar o comportamento desses dados usando a 
+biblioteca matplotlib'''
+'''o método mais fácil de usar a biblioteca (e tbm o mais usual) é 
+usar a forma funcional'''
+
+
+selic_plot = plt.plot(selic.index, selic)
+plt.xlabel('data')
+plt.ylabel('taxa de juros')
+plt.title('SELIC')
+plt.close()
+'''Entendemos como podemos plotar um gráfico usando o método plot e 
+vimos as variações que a taxa selic teve desde a redemocratização
+. Podemos perceber uma tendência geral de queda nos últmos anos'''
+
+exo_plot = plt.plot(exportação.index, exportação)
+pib_plot = plt.plot(pib.index, pib)
+plt.close
+'''Estamos plotando no mesmo gráfico as variações de produto
+e exportações, podemos notar que o boom das commoditeis explica
+parte do crescimento do PIB entre 2003 e 2005'''
+
+cons_plot = plt.plot(consumo_familias.index, consumo_familias)
+exo_plot
