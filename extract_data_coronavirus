@@ -1,0 +1,29 @@
+#
+import requests as req
+from bs4 import BeautifulSoup as soup
+import pandas as pd
+
+
+#finding and parsing the right table
+html = req.get("https://www.worldometers.info/coronavirus/").text
+sauce = soup(html, "html.parser")
+table = sauce.find('table')
+lista_headers = []
+headers = table.tr.find_all('th')
+
+for i in headers:
+    i = i.get_text().strip()
+    lista_headers.append(i)
+
+
+lista_td = []
+df = pd.DataFrame(columns = [lista_headers])
+i = 0
+
+for tr in table.find_all("tr"):
+    for td in tr.find_all('td'):
+        td = td.get_text()
+        td = td.strip()
+        lista_td.append(td)
+        df[i] = lista_td
+        i = i+1
