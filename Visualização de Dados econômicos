@@ -13,6 +13,12 @@ from urllib.request import urlopen
 
 
 
+'''Exemplos simples sobre o Matplotlib, uma introdução a biblioteca'''
+x = [1,2,3,4,5,6,7,8,9,10]
+y = [1,4,9,16,25,36,49,64,81,100]
+plt.plot(x,y)
+plt.close()
+
 
 def get_data_bcb(código):
     url = "http://api.bcb.gov.br/dados/serie/bcdata.sgs.{}/dados?formato=json".format(código)
@@ -25,6 +31,7 @@ def get_data_bcb(código):
 selic = get_data_bcb(11)
 exportação = get_data_bcb(23471)
 pib = get_data_bcb(7324)
+pib = pib.loc['01/01/1995':]
 consumo_familias = get_data_bcb(22110)
 credito_fisica = get_data_bcb(20541)
 '''até essa parte vocês já sabem e virão no workshop sobre a extração de
@@ -33,7 +40,11 @@ os dados e vamos visualizar o comportamento desses dados usando a
 biblioteca matplotlib'''
 '''o método mais fácil de usar a biblioteca (e tbm o mais usual) é 
 usar a forma funcional'''
-
+'''algumas variáveis funcionam melhor analisando a variação percentual
+e outras analisando o valor defaut'''
+change_exportação = exportação.pct_change()
+change_consumo_familias = consumo_familias.pct_change()
+change_pib = pib.pct_change()
 
 selic_plot = plt.plot(selic.index, selic)
 plt.xlabel('data')
@@ -47,9 +58,17 @@ vimos as variações que a taxa selic teve desde a redemocratização
 
 plt.plot(pib.index, pib)
 plt.close()
+plt.plot(exportação.index, exportação)
+plt.close()
 '''Estamos plotando no mesmo gráfico as variações de produto
 e exportações, podemos notar que o boom das commoditeis explica
 parte do crescimento do PIB entre 2003 e 2005'''
+plt.plot(change_consumo_familias.index, change_consumo_familias)
+plt.plot(change_exportação.index, change_exportação)
+plt.close()
+'''a serie change_consumo_familias está com variações sazonais
+talvez seja interessante falar sobre dessazonalização ou então 
+não usar a variável consumo das falílias'''
+plt.plot(pib.index,change_pib)
+plt.plot(exportação.index,change_exportação)
 
-cons_plot = plt.plot(consumo_familias.index, consumo_familias)
-plt.plot(exportação.index, exportação)
