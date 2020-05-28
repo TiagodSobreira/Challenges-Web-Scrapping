@@ -1,65 +1,47 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 11 16:46:07 2020
+Created on Sun Apr 19 04:34:39 2020
 
 @author: tiago
 """
-
-
-#workshop de visualização de dados econômicos com matplotlib
-from matplotlib import pyplot as plt
 import pandas as pd
-from urllib.request import urlopen
+import requests as req
+from bs4 import BeautifulSoup
 
 
+url = 'https://www.worldometers.info/coronavirus/'
+page = req.get(url)
 
 
-def get_data_bcb(código):
-    url = "http://api.bcb.gov.br/dados/serie/bcdata.sgs.{}/dados?formato=json".format(código)
-    html = urlopen(url).read()
-    df = pd.read_json(html)
-    df.index = pd.to_datetime(df['data'])
-    df = df['valor']
-    return df
-
-selic = get_data_bcb(11)
-exportação = get_data_bcb(23471)
-pib = get_data_bcb(7324)
-consumo_familias = get_data_bcb(22110)
-credito_fisica = get_data_bcb(20541)
-'''até essa parte vocês já sabem e virão no workshop sobre a extração de
-dados do Banco Central. Agora vamos aproveitar que conseguimos extrair
-os dados e vamos visualizar o comportamento desses dados usando a 
-biblioteca matplotlib'''
-'''o método mais fácil de usar a biblioteca (e tbm o mais usual) é 
-usar a forma funcional'''
-'''algumas variáveis funcionam melhor analisando a variação percentual
-e outras analisando o valor defaut'''
-change_exportação = exportação.pct_change()
-change_consumo_familias = consumo_familias.pct_change()
+soup = BeautifulSoup(page.content, 'html.parser')
+table = soup.find(name='table')
+table_str = str(table)
 
 
-selic_plot = plt.plot(selic.index, selic)
-plt.xlabel('data')
-plt.ylabel('taxa de juros')
-plt.title('SELIC')
-plt.close()
-'''Entendemos como podemos plotar um gráfico usando o método plot e 
-vimos as variações que a taxa selic teve desde a redemocratização
-. Podemos perceber uma tendência geral de queda nos últmos anos'''
+df = pd.read_html(table_str)[0]
+df.index = df['Country,Other']
+del df['Country,Other']
 
 
-plt.plot(pib.index, pib)
-plt.close()
-plt.plot(exportação.index, exportação)
-plt.close()
-'''Estamos plotando no mesmo gráfico as variações de produto
-e exportações, podemos notar que o boom das commoditeis explica
-parte do crescimento do PIB entre 2003 e 2005'''
-plt.plot(change_consumo_familias.index, change_consumo_familias)
-plt.plot(change_exportação.index, change_exportação)
-'''a serie change_consumo_familias está com variações sazonais
-talvez seja interessante falar sobre dessazonalização ou então 
-não usar a variável consumo das falílias'''
+df['NewCases'].fillna('0',inplace=True)
+df['NewDeaths'].fillna('0',inplace=True)
+df['TotalDeaths'].fillna(0,inplace=True)
+df.fillna('-',inplace=True)
 
+
+def take_out_plus_sign(column):
+    lista3 = []
+    lista4 = []
+    for i in column:
+        i = i.strip('+')
+        lista3.append(i)
+    for i in lista3:
+        x = float(i.replace(',',''))
+        lista4.append(x)
+    return lista4
+
+
+df['NewCases'] = take_out_plus_sign(df['NewCases'])
+df['NewDeaths'] = take_out_plus_sign((df['NewDeaths']))
+df.to_excel('corona_virus_world_data.xlsx')    
 
